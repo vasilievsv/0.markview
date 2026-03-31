@@ -1,0 +1,76 @@
+﻿{
+  "name": "0-markview",
+  "displayName": "0.markview",
+  "description": "Multi-preview markdown viewer for VSCode",
+  "version": "0.1.0",
+  "publisher": "vasilievsv",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vasilievsv/0.markview"
+  },
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": ["Other"],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onCustomEditor:markview.markdownPreview"
+  ],
+  "contributes": {
+    "commands": [
+      { "command": "markview.openPreview", "title": "0.markview: Open Preview" },
+      { "command": "markview.openPreviewToSide", "title": "0.markview: Open Preview to Side" },
+      { "command": "markview.toggleAutoPreview", "title": "0.markview: Toggle Auto Preview" },
+      { "command": "markview.editSource", "title": "0.markview: Edit Source" },
+      { "command": "markview.exportPdf", "title": "0.markview: Export to PDF" },
+      { "command": "markview.toggleToc", "title": "0.markview: Toggle TOC" }
+    ],
+    "customEditors": [
+      {
+        "viewType": "markview.markdownPreview",
+        "displayName": "Markdown Preview (0.markview)",
+        "selector": [
+          { "filenamePattern": "*.md" },
+          { "filenamePattern": "*.markdown" }
+        ],
+        "priority": "option"
+      }
+    ],
+    "configuration": {
+      "title": "0.markview",
+      "properties": {
+        "multiPreview.enabled": { "type": "boolean", "default": true, "description": "Enable multi-preview" },
+        "multiPreview.defaultViewer": { "type": "string", "enum": ["editor", "preview"], "default": "editor", "description": "Default viewer for .md files" },
+        "multiPreview.autoOpen": { "type": "boolean", "default": true, "description": "Auto-open preview" },
+        "multiPreview.autoClose": { "type": "boolean", "default": true, "description": "Auto-close preview" },
+        "multiPreview.openToSide": { "type": "boolean", "default": true, "description": "Open preview to side" },
+        "multiPreview.scrollSync": { "type": "boolean", "default": true, "description": "Bidirectional scroll sync" },
+        "multiPreview.toc.enabled": { "type": "boolean", "default": true, "description": "Enable TOC" },
+        "multiPreview.fontSize": { "type": "number", "default": 14, "description": "Preview font size" }
+      }
+    },
+    "keybindings": [
+      { "command": "markview.openPreview", "key": "ctrl+shift+v", "when": "resourceLangId == markdown" },
+      { "command": "markview.openPreviewToSide", "key": "ctrl+k v", "when": "resourceLangId == markdown" },
+      { "command": "markview.editSource", "key": "ctrl+e", "when": "activeCustomEditorId == markview.markdownPreview" }
+    ]
+  },
+  "scripts": {
+    "compile": "node esbuild.mjs",
+    "watch": "node esbuild.mjs --watch",
+    "package": "node esbuild.mjs --production",
+    "typecheck": "tsc --noEmit",
+    "vscode:prepublish": "npm run package"
+  },
+  "dependencies": {
+    "markdown-it": "^14.0.0",
+    "highlight.js": "^11.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "esbuild": "^0.24.0",
+    "@types/vscode": "^1.75.0",
+    "@types/markdown-it": "^14.0.0"
+  }
+}

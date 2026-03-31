@@ -3,8 +3,15 @@ import hljs from 'highlight.js';
 import * as vscode from 'vscode';
 import { getNonce } from './types';
 
+export interface TocEntry {
+  level: number;
+  text: string;
+  id: string;
+}
+
 export class MarkdownRenderer {
   private readonly md: MarkdownIt;
+  private lastToc: TocEntry[] = [];
 
   constructor() {
     this.md = new MarkdownIt({
@@ -21,10 +28,17 @@ export class MarkdownRenderer {
       }
     });
     this.addSourceLineAttributes();
+    this.addHeadingIds();
+    this.addMermaidFence();
   }
 
   render(markdown: string): string {
+    this.lastToc = [];
     return this.md.render(markdown);
+  }
+
+  getToc(): TocEntry[] {
+    return this.lastToc;
   }
 
   getHtmlTemplate(
@@ -47,6 +61,8 @@ export class MarkdownRenderer {
       `font-src ${webview.cspSource}`
     ].join('; ');
 
+    const tocHtml = this.buildTocHtml();
+
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -57,10 +73,23 @@ export class MarkdownRenderer {
   <title>Markdown Preview</title>
 </head>
 <body>
+  <div id="toc-toggle" title="Toggle TOC">☰</div>
+  <nav id="toc">${tocHtml}</nav>
   <div id="preview">${body}</div>
   <script nonce="${nonce}" src="${scriptUri}"></script>
 </body>
 </html>`;
+  }
+
+  private buildTocHtml(): string {
+    if (this.lastToc.length === 0) { return ''; }
+    return '<ul>' + this.lastToc.map(e =>
+      `<li class="toc-h${e.level}"><a href="#${e.id}">${e.text}</a></li>`
+    ).join('') + '</ul>';
+  }
+
+  private slugify(text: string): string {
+    return text.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim();
   }
 
   private addSourceLineAttributes(): void {
@@ -74,16 +103,43 @@ export class MarkdownRenderer {
       }
       return defaultRender(tokens, idx, options, env, self);
     };
+  }
+
+  private addHeadingIds(): void {
+    const slugCounts = new Map<string, number>();
 
     const defaultHeadingOpen = this.md.renderer.rules.heading_open ||
       ((tokens: any, idx: any, options: any, _env: any, self: any) => self.renderToken(tokens, idx, options));
 
     this.md.renderer.rules.heading_open = (tokens, idx, options, env, self) => {
       const token = tokens[idx];
+      const level = parseInt(token.tag.slice(1), 10);
+      const contentToken = tokens[idx + 1];
+      const text = contentToken?.children?.reduce((acc: string, t: any) => acc + t.content, '') || '';
+      let slug = this.slugify(text);
+      const count = slugCounts.get(slug) || 0;
+      if (count > 0) { slug = `${slug}-${count}`; }
+      slugCounts.set(slug, count + 1);
+      token.attrSet('id', slug);
       if (token.map && token.map[0] !== undefined) {
         token.attrSet('data-source-line', String(token.map[0]));
       }
-      return defaultHeadingOpen(tokens, idx, options, env, self);
+      this.lastToc.push({ level, text, id: slug });
+      return self.renderToken(tokens, idx, options);
+    };
+  }
+
+  private addMermaidFence(): void {
+    const defaultFence = this.md.renderer.rules.fence ||
+      ((tokens: any, idx: any, options: any, _env: any, self: any) => self.renderToken(tokens, idx, options));
+
+    this.md.renderer.rules.fence = (tokens, idx, options, env, self) => {
+      const token = tokens[idx];
+      if (token.info.trim() === 'mermaid') {
+        const escaped = this.md.utils.escapeHtml(token.content);
+        return `<div class="mermaid-source">${escaped}</div>`;
+      }
+      return defaultFence(tokens, idx, options, env, self);
     };
   }
 }

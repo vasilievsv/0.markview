@@ -4,7 +4,11 @@
   setState(state: { scrollPosition?: number; tocVisible?: boolean }): void;
 };
 
-import { renderMermaidBlocks } from './mermaid-init';
+async function lazyRenderMermaid(): Promise<void> {
+  if (!document.querySelector('.mermaid-source')) { return; }
+  const { renderMermaidBlocks } = await import('./mermaid-init');
+  await renderMermaidBlocks();
+}
 
 const vscode = acquireVsCodeApi();
 const preview = document.getElementById('preview');
@@ -48,7 +52,7 @@ window.addEventListener('message', (event) => {
     preview.innerHTML = msg.body;
     window.scrollTo(0, scrollPos);
     isExternalUpdate = false;
-    renderMermaidBlocks();
+    lazyRenderMermaid();
   }
   if (msg.command === 'updateToc' && toc) {
     toc.innerHTML = msg.html;
@@ -163,4 +167,4 @@ async function exportToPdf(filename: string): Promise<void> {
   }
 }
 
-renderMermaidBlocks();
+lazyRenderMermaid();

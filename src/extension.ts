@@ -1,5 +1,6 @@
 ﻿import * as vscode from 'vscode';
 import { Commands, VIEW_TYPE } from './types';
+import { PreviewManager } from './previewManager';
 import * as logger from './logger';
 
 class StubEditorProvider implements vscode.CustomTextEditorProvider {
@@ -14,8 +15,28 @@ class StubEditorProvider implements vscode.CustomTextEditorProvider {
   }
 }
 
+function isMarkdownFile(document?: vscode.TextDocument): document is vscode.TextDocument {
+  return !!document && document.languageId === 'markdown';
+}
+
 export function activate(context: vscode.ExtensionContext) {
   logger.info('0.markview activating');
+
+  const previewManager = new PreviewManager(context.extensionUri);
+
+  const openPreview = vscode.commands.registerCommand(Commands.OPEN_PREVIEW, () => {
+    const editor = vscode.window.activeTextEditor;
+    if (isMarkdownFile(editor?.document)) {
+      previewManager.openPreview(editor.document, vscode.ViewColumn.Active);
+    }
+  });
+
+  const openPreviewToSide = vscode.commands.registerCommand(Commands.OPEN_PREVIEW_TO_SIDE, () => {
+    const editor = vscode.window.activeTextEditor;
+    if (isMarkdownFile(editor?.document)) {
+      previewManager.openPreview(editor.document, vscode.ViewColumn.Beside);
+    }
+  });
 
   const stub = (name: string) =>
     vscode.commands.registerCommand(name, () =>
@@ -23,8 +44,9 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
   context.subscriptions.push(
-    stub(Commands.OPEN_PREVIEW),
-    stub(Commands.OPEN_PREVIEW_TO_SIDE),
+    previewManager,
+    openPreview,
+    openPreviewToSide,
     stub(Commands.TOGGLE_AUTO_PREVIEW),
     stub(Commands.EDIT_SOURCE),
     stub(Commands.EXPORT_PDF),

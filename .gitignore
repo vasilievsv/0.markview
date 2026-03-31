@@ -1,7 +1,4 @@
-﻿out/
-node_modules/
-.vscode-test/
-*.vsix
-.DS_Store
-*.js.map
+﻿node_modules/
 dist/
+*.vsix
+.vscode-test/

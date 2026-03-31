@@ -1,111 +1,70 @@
 ﻿# 0.markview
 
-Multi-preview markdown viewer for VS Code. Each `.md` file gets its own independent preview tab.
+Your markdown deserves more than one preview tab.
 
-## Features
+Open 10 files — get 10 previews. Each lives in its own tab, renders independently, and stays in sync with your edits. No fighting over a single shared panel.
 
-🔄 **Multi Preview** — open multiple `.md` files, each with its own preview tab. No shared state, no conflicts.
+## What you get
 
-📖 **Default Viewer** — `.md` files open as rendered preview by default. `Ctrl+E` to edit source side-by-side.
+🔄 **One file = one preview.** Always. Open `README.md` and `CHANGELOG.md` side by side — both render live.
 
-📑 **TOC Sidebar** — click ☰ in preview to toggle table of contents. Click heading to navigate.
+📖 **Preview by default.** Click any `.md` — you see the rendered result, not raw markup. Hit `Ctrl+E` when you need the source.
 
-🧜 **Mermaid Diagrams** — flowcharts, sequence, state, class, ER, gantt, pie, git graph render inline.
+🧜 **Mermaid just works.** Drop a ```` ```mermaid ```` block — flowcharts, sequences, state diagrams appear inline. No extra extensions.
 
-📄 **PDF Export** — `Ctrl+Shift+P` → `0.markview: Export to PDF`. Single-page output, no page breaks.
+📑 **TOC in one click.** Hit ☰ — get a floating table of contents. Click a heading — smooth scroll.
 
-🎨 **Theme Integration** — follows VS Code light/dark/high-contrast themes automatically via CSS variables.
+📄 **Export to PDF.** One command, one file. Diagrams included, no page breaks cutting through your flowcharts.
 
-💡 **Syntax Highlighting** — 190+ languages via highlight.js.
+🎨 **Follows your theme.** Light, dark, high contrast — preview adapts automatically.
 
-🔍 **Scroll Sync** — preview tracks source line position via `data-source-line` attributes.
+⚡ **Loads what it needs.** Base preview: 5KB. Mermaid and PDF engine load only when you actually use them.
 
-⚡ **Lazy Loading** — mermaid.js (~5MB) and html2pdf.js (~2.4MB) load only when needed. Base preview is 4.8KB.
-
-## Architecture
+## Quick start
 
 ```
-preview.ts (4.8KB)          ← always loaded
-  ├── mermaid-init.ts       ← lazy: only if ```mermaid``` blocks found
-  │   └── mermaid chunks    ← lazy: per diagram type (flowchart, sequence, etc.)
-  └── html2pdf.js           ← lazy: only on Export PDF command
+ext install vasilievsv.0-markview
 ```
 
-## Commands
+Open any `.md` file. That's it.
 
-| Command | Keybinding | Description |
-|---------|-----------|-------------|
-| `0.markview: Open Preview` | `Ctrl+Shift+V` | Open preview in current tab |
-| `0.markview: Open Preview to Side` | `Ctrl+K V` | Open preview side-by-side |
-| `0.markview: Edit Source` | `Ctrl+E` | Open source next to preview |
-| `0.markview: Toggle Auto Preview` | — | Toggle auto-open behavior |
-| `0.markview: Export to PDF` | — | Export current preview to PDF |
-| `0.markview: Toggle TOC` | — | Toggle table of contents |
+## Keybindings
 
-## Settings
+| What | Keys |
+|------|------|
+| Preview | `Ctrl+Shift+V` |
+| Preview to side | `Ctrl+K V` |
+| Edit source | `Ctrl+E` |
+| Export PDF | Command palette → `Export to PDF` |
+| Toggle TOC | ☰ button in preview |
 
-| Setting | Default | Description |
-|---------|---------|-------------|
-| `multiPreview.enabled` | `true` | Enable multi-preview |
-| `multiPreview.defaultViewer` | `"preview"` | Default viewer for .md files |
-| `multiPreview.autoOpen` | `false` | Auto-open preview panel |
-| `multiPreview.autoClose` | `true` | Auto-close preview when source closes |
-| `multiPreview.openToSide` | `true` | Open preview to side |
-| `multiPreview.scrollSync` | `true` | Bidirectional scroll sync |
-| `multiPreview.toc.enabled` | `true` | Enable TOC |
-| `multiPreview.fontSize` | `14` | Preview font size |
-| `multiPreview.debounceMs` | `150` | Debounce delay for auto-open |
-
-## Mermaid Support
+## Mermaid
 
 ````markdown
 ```mermaid
-graph TD
-    A[Start] --> B{Decision}
-    B -->|Yes| C[Action]
-    B -->|No| D[End]
+graph LR
+    A[Write markdown] --> B[See preview]
+    B --> C{Need diagram?}
+    C -->|Yes| D[Just add mermaid block]
+    C -->|No| E[Keep writing]
 ```
 ````
 
-Supported: flowchart, sequence, state, class, ER, gantt, pie, git graph, mindmap, timeline, sankey, kanban.
+Flowchart, sequence, state, class, ER, gantt, pie, git graph, mindmap, timeline, sankey, kanban — all supported.
 
-## Tech Stack
+## Settings
 
-- TypeScript + esbuild (dual entry + code splitting)
-- markdown-it + highlight.js
-- mermaid.js (lazy loaded, per-diagram chunks)
-- html2pdf.js (lazy loaded, client-side PDF)
-- CustomTextEditorProvider API
+| Setting | Default | What it does |
+|---------|---------|-------------|
+| `multiPreview.autoClose` | `true` | Close preview when source tab closes |
+| `multiPreview.openToSide` | `true` | Preview opens beside the source |
+| `multiPreview.scrollSync` | `true` | Scroll sync between source and preview |
+| `multiPreview.toc.enabled` | `true` | Enable TOC sidebar |
+| `multiPreview.fontSize` | `14` | Preview font size |
 
-## Development
+## Built with
 
-```bash
-npm install
-npm run compile      # build extension + webview
-npm run typecheck    # type check
-npm run watch        # watch mode
-npm run package      # production build (minified)
-# F5 in VS Code → Extension Development Host
-```
-
-## Project Structure
-
-```
-src/
-├── extension.ts              ← activate/deactivate, commands
-├── customMarkdownEditor.ts   ← CustomTextEditorProvider (default .md viewer)
-├── previewManager.ts         ← standalone WebviewPanel[] (Ctrl+Shift+V)
-├── markdownRenderer.ts       ← markdown-it + highlight.js + TOC extraction
-├── autoPreviewManager.ts     ← auto-close on tab close
-├── configManager.ts          ← settings wrapper
-├── types.ts                  ← constants, interfaces
-├── utils.ts                  ← debounce, helpers
-├── logger.ts                 ← OutputChannel
-└── webview/
-    ├── preview.ts            ← webview entry (4.8KB base)
-    ├── mermaid-init.ts       ← lazy mermaid loader
-    └── html2pdf.d.ts         ← type declarations
-```
+TypeScript · esbuild · markdown-it · highlight.js · mermaid.js · html2pdf.js · CustomTextEditorProvider API
 
 ## License
 

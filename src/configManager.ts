@@ -25,6 +25,7 @@ export class ConfigManager implements vscode.Disposable {
   get scrollSync(): boolean { return this.cfg().get<boolean>('scrollSync', true); }
   get tocEnabled(): boolean { return this.cfg().get<boolean>('toc.enabled', true); }
   get fontSize(): number { return this.cfg().get<number>('fontSize', 14); }
+  get debounceMs(): number { return this.cfg().get<number>('debounceMs', 150); }
 
   dispose(): void {
     this._onDidChange.dispose();

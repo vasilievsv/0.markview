@@ -1,19 +1,31 @@
 import * as vscode from 'vscode';
 import { MarkdownRenderer } from './markdownRenderer';
-import { VIEW_TYPE } from './types';
+import { PREVIEW_PANEL_TYPE } from './types';
+import { debounce, isMarkdownFile } from './utils';
 import * as logger from './logger';
 
 export class PreviewManager implements vscode.Disposable {
   private readonly panels = new Map<string, vscode.WebviewPanel>();
   private readonly renderer = new MarkdownRenderer();
   private readonly disposables: vscode.Disposable[] = [];
-  private updateTimeout: ReturnType<typeof setTimeout> | undefined;
+  private readonly debouncedUpdate = debounce((doc: vscode.TextDocument) => {
+    const key = doc.uri.toString();
+    const panel = this.panels.get(key);
+    if (panel && panel.visible) {
+      const body = this.renderer.render(doc.getText());
+      panel.webview.postMessage({ command: 'update', body });
+      const tocHtml = this.renderer.getToc().length > 0
+        ? '<ul>' + this.renderer.getToc().map(e => `<li class="toc-h${e.level}"><a href="#${e.id}">${e.text}</a></li>`).join('') + '</ul>'
+        : '';
+      panel.webview.postMessage({ command: 'updateToc', html: tocHtml });
+    }
+  }, 300);
 
   constructor(private readonly extensionUri: vscode.Uri) {
     this.disposables.push(
       vscode.workspace.onDidChangeTextDocument(e => {
-        if (e.document.languageId === 'markdown') {
-          this.scheduleUpdate(e.document);
+        if (isMarkdownFile(e.document)) {
+          this.debouncedUpdate(e.document);
         }
       }),
       vscode.workspace.onDidCloseTextDocument(doc => {
@@ -31,7 +43,7 @@ export class PreviewManager implements vscode.Disposable {
     }
 
     const panel = vscode.window.createWebviewPanel(
-      VIEW_TYPE,
+      PREVIEW_PANEL_TYPE,
       `Preview: ${this.getTitle(document)}`,
       viewColumn ?? vscode.ViewColumn.Active,
       {
@@ -62,9 +74,7 @@ export class PreviewManager implements vscode.Disposable {
   }
 
   dispose(): void {
-    if (this.updateTimeout) {
-      clearTimeout(this.updateTimeout);
-    }
+    this.debouncedUpdate.cancel();
     for (const panel of this.panels.values()) {
       panel.dispose();
     }
@@ -72,20 +82,6 @@ export class PreviewManager implements vscode.Disposable {
     for (const d of this.disposables) {
       d.dispose();
     }
-  }
-
-  private scheduleUpdate(document: vscode.TextDocument): void {
-    if (this.updateTimeout) {
-      clearTimeout(this.updateTimeout);
-    }
-    this.updateTimeout = setTimeout(() => {
-      const key = document.uri.toString();
-      const panel = this.panels.get(key);
-      if (panel && panel.visible) {
-        const body = this.renderer.render(document.getText());
-        panel.webview.postMessage({ command: 'update', body });
-      }
-    }, 300);
   }
 
   private renderToPanel(panel: vscode.WebviewPanel, document: vscode.TextDocument): void {

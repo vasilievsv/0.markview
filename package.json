@@ -16,9 +16,7 @@
     "Other"
   ],
   "main": "./dist/extension.js",
-  "activationEvents": [
-    "onCustomEditor:markview.markdownPreview"
-  ],
+  "activationEvents": [],
   "contributes": {
     "commands": [
       {
@@ -80,7 +78,7 @@
         },
         "multiPreview.autoOpen": {
           "type": "boolean",
-          "default": true,
+          "default": false,
           "description": "Auto-open preview"
         },
         "multiPreview.autoClose": {
@@ -107,6 +105,13 @@
           "type": "number",
           "default": 14,
           "description": "Preview font size"
+        },
+        "multiPreview.debounceMs": {
+          "type": "number",
+          "default": 150,
+          "minimum": 50,
+          "maximum": 1000,
+          "description": "Debounce delay (ms) for auto-open preview"
         }
       }
     },
@@ -139,7 +144,9 @@
   },
   "dependencies": {
     "highlight.js": "^11.0.0",
-    "markdown-it": "^14.0.0"
+    "html2pdf.js": "^0.14.0",
+    "markdown-it": "^14.0.0",
+    "mermaid": "^11.13.0"
   },
   "devDependencies": {
     "@types/markdown-it": "^14.0.0",

@@ -2,6 +2,7 @@
 
 export const EXTENSION_ID = 'markview';
 export const VIEW_TYPE = 'markview.markdownPreview';
+export const PREVIEW_PANEL_TYPE = 'markview.standalonePreview';
 
 export const Commands = {
   OPEN_PREVIEW: 'markview.openPreview',

@@ -3,17 +3,16 @@ import { Commands, VIEW_TYPE } from './types';
 import { PreviewManager } from './previewManager';
 import { MarkdownEditorProvider } from './customMarkdownEditor';
 import { ConfigManager } from './configManager';
+import { AutoPreviewManager } from './autoPreviewManager';
+import { isMarkdownFile } from './utils';
 import * as logger from './logger';
-
-function isMarkdownFile(document?: vscode.TextDocument): document is vscode.TextDocument {
-  return !!document && document.languageId === 'markdown';
-}
 
 export function activate(context: vscode.ExtensionContext) {
   logger.info('0.markview activating');
 
   const previewManager = new PreviewManager(context.extensionUri);
   const configManager = new ConfigManager();
+  const autoPreviewManager = new AutoPreviewManager(previewManager, configManager);
 
   const openPreview = vscode.commands.registerCommand(Commands.OPEN_PREVIEW, () => {
     const editor = vscode.window.activeTextEditor;
@@ -27,6 +26,11 @@ export function activate(context: vscode.ExtensionContext) {
     if (isMarkdownFile(editor?.document)) {
       previewManager.openPreview(editor.document, vscode.ViewColumn.Beside);
     }
+  });
+
+  const toggleAutoPreview = vscode.commands.registerCommand(Commands.TOGGLE_AUTO_PREVIEW, () => {
+    const state = autoPreviewManager.toggle();
+    vscode.window.showInformationMessage(`Auto-preview: ${state ? 'ON' : 'OFF'}`);
   });
 
   const stub = (name: string) =>
@@ -45,21 +49,37 @@ export function activate(context: vscode.ExtensionContext) {
     }
   });
 
+  const editorProvider = new MarkdownEditorProvider(context);
+
+  const exportPdf = vscode.commands.registerCommand(Commands.EXPORT_PDF, () => {
+    const activeTab = vscode.window.tabGroups.activeTabGroup.activeTab;
+    if (activeTab?.input instanceof vscode.TabInputCustom
+        && activeTab.input.viewType === VIEW_TYPE) {
+      const uri = activeTab.input.uri;
+      const filename = uri.path.split('/').pop()?.replace(/\.md$|\.markdown$/, '') || 'document';
+      const panel = editorProvider.getPanel(uri);
+      if (panel) {
+        panel.webview.postMessage({ command: 'exportPdf', filename });
+      }
+    }
+  });
+
   context.subscriptions.push(
     previewManager,
     configManager,
+    autoPreviewManager,
     openPreview,
     openPreviewToSide,
+    toggleAutoPreview,
     editSource,
-    stub(Commands.TOGGLE_AUTO_PREVIEW),
-    stub(Commands.EXPORT_PDF),
+    exportPdf,
     stub(Commands.TOGGLE_TOC),
     vscode.window.registerCustomEditorProvider(
       VIEW_TYPE,
-      new MarkdownEditorProvider(context),
+      editorProvider,
       {
         webviewOptions: { retainContextWhenHidden: true },
-        supportsMultipleEditorsPerDocument: true
+        supportsMultipleEditorsPerDocument: false
       }
     )
   );

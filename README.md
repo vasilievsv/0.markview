@@ -62,10 +62,7 @@ Flowchart, sequence, state, class, ER, gantt, pie, git graph, mindmap, timeline,
 | Настройка | По умолчанию | Что делает |
 |-----------|-------------|------------|
 | `multiPreview.autoClose` | `true` | Закрывать preview при закрытии исходника |
-| `multiPreview.openToSide` | `true` | Preview рядом с исходником |
-| `multiPreview.scrollSync` | `true` | Синхронизация скролла |
 | `multiPreview.toc.enabled` | `true` | Оглавление (TOC) |
-| `multiPreview.fontSize` | `14` | Размер шрифта |
 
 ## Стек
 

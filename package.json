@@ -58,7 +58,7 @@
             "filenamePattern": "*.markdown"
           }
         ],
-        "priority": "option"
+        "priority": "default"
       }
     ],
     "configuration": {
@@ -75,7 +75,7 @@
             "editor",
             "preview"
           ],
-          "default": "editor",
+          "default": "preview",
           "description": "Default viewer for .md files"
         },
         "multiPreview.autoOpen": {

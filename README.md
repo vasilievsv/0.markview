@@ -1,71 +1,77 @@
 ﻿# 0.markview
 
-Your markdown deserves more than one preview tab.
+Расширение для VS Code и [Kiro](https://kiro.dev). Markdown preview, который делает три вещи, которых нет из коробки.
 
-Open 10 files — get 10 previews. Each lives in its own tab, renders independently, and stays in sync with your edits. No fighting over a single shared panel.
+## 1. PDF без костылей
 
-## What you get
+Одна команда → один PDF. Mermaid-диаграммы рендерятся как изображения, без разрывов страниц посреди flowchart. Без Chrome, без Puppeteer, без внешних утилит. Всё происходит внутри webview.
 
-🔄 **One file = one preview.** Always. Open `README.md` and `CHANGELOG.md` side by side — both render live.
+## 2. Мульти-preview
 
-📖 **Preview by default.** Click any `.md` — you see the rendered result, not raw markup. Hit `Ctrl+E` when you need the source.
+Открыл 10 `.md` — получил 10 независимых preview-табов. Каждый рендерится сам по себе, синхронизируется с правками, не дерётся за общую панель. TOC-sidebar, mermaid-диаграммы, подсветка синтаксиса, поддержка тем — всё в каждом табе.
 
-🧜 **Mermaid just works.** Drop a ```` ```mermaid ```` block — flowcharts, sequences, state diagrams appear inline. No extra extensions.
+## 3. Оптимизация
 
-📑 **TOC in one click.** Hit ☰ — get a floating table of contents. Click a heading — smooth scroll.
+Большинство markdown-превьюеров грузят всё сразу. Мы — нет.
 
-📄 **Export to PDF.** One command, one file. Diagrams included, no page breaks cutting through your flowcharts.
+```
+Открыл README.md (без mermaid, без PDF)
+  → загрузилось 5KB. Всё.
 
-🎨 **Follows your theme.** Light, dark, high contrast — preview adapts automatically.
+Открыл architecture.md (есть mermaid-блоки)
+  → 5KB + ядро mermaid по требованию
+  → каждый тип диаграмм — отдельный chunk
 
-⚡ **Loads what it needs.** Base preview: 5KB. Mermaid and PDF engine load only when you actually use them.
+Нажал "Export to PDF"
+  → html2pdf.js грузится впервые
+  → SVG конвертируются в PNG на лету
+```
 
-## Quick start
+10 табов открыто? Каждый — 5KB пока не понадобится больше. Mermaid весит ~5MB — платишь только когда используешь.
+
+---
+
+## Быстрый старт
 
 ```
 ext install vasilievsv.0-markview
 ```
 
-Open any `.md` file. That's it.
+Открой любой `.md` файл. Готово.
 
-## Keybindings
+## Горячие клавиши
 
-| What | Keys |
-|------|------|
+| Что | Клавиши |
+|-----|---------|
 | Preview | `Ctrl+Shift+V` |
-| Preview to side | `Ctrl+K V` |
-| Edit source | `Ctrl+E` |
-| Export PDF | Command palette → `Export to PDF` |
-| Toggle TOC | ☰ button in preview |
+| Preview сбоку | `Ctrl+K V` |
+| Исходник | `Ctrl+E` |
+| Экспорт PDF | Палитра команд → `Export to PDF` |
+| Оглавление | ☰ в preview |
 
 ## Mermaid
 
-````markdown
-```mermaid
-graph LR
-    A[Write markdown] --> B[See preview]
-    B --> C{Need diagram?}
-    C -->|Yes| D[Just add mermaid block]
-    C -->|No| E[Keep writing]
-```
-````
+Flowchart, sequence, state, class, ER, gantt, pie, git graph, mindmap, timeline, sankey, kanban.
 
-Flowchart, sequence, state, class, ER, gantt, pie, git graph, mindmap, timeline, sankey, kanban — all supported.
+## Настройки
 
-## Settings
+| Настройка | По умолчанию | Что делает |
+|-----------|-------------|------------|
+| `multiPreview.autoClose` | `true` | Закрывать preview при закрытии исходника |
+| `multiPreview.openToSide` | `true` | Preview рядом с исходником |
+| `multiPreview.scrollSync` | `true` | Синхронизация скролла |
+| `multiPreview.toc.enabled` | `true` | Оглавление (TOC) |
+| `multiPreview.fontSize` | `14` | Размер шрифта |
 
-| Setting | Default | What it does |
-|---------|---------|-------------|
-| `multiPreview.autoClose` | `true` | Close preview when source tab closes |
-| `multiPreview.openToSide` | `true` | Preview opens beside the source |
-| `multiPreview.scrollSync` | `true` | Scroll sync between source and preview |
-| `multiPreview.toc.enabled` | `true` | Enable TOC sidebar |
-| `multiPreview.fontSize` | `14` | Preview font size |
+## Стек
 
-## Built with
+TypeScript · esbuild (code splitting) · markdown-it · highlight.js · mermaid.js · html2pdf.js
 
-TypeScript · esbuild · markdown-it · highlight.js · mermaid.js · html2pdf.js · CustomTextEditorProvider API
+## Совместимость
 
-## License
+- VS Code ^1.75.0
+- [Kiro](https://kiro.dev)
+
+## Лицензия
 
 MIT

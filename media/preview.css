@@ -1,0 +1,97 @@
+body {
+  margin: 0;
+  padding: 0 26px;
+  max-width: 960px;
+  margin-left: auto;
+  margin-right: auto;
+  font-family: var(--vscode-editor-font-family, -apple-system, BlinkMacSystemFont, sans-serif);
+  font-size: var(--vscode-editor-font-size, 14px);
+  color: var(--vscode-editor-foreground);
+  background-color: var(--vscode-editor-background);
+  line-height: 1.6;
+  word-wrap: break-word;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--vscode-editor-foreground);
+  font-weight: 600;
+  margin-top: 24px;
+  margin-bottom: 16px;
+  line-height: 1.25;
+}
+
+h1 { font-size: 2em; border-bottom: 1px solid var(--vscode-panel-border, #444); padding-bottom: 0.3em; }
+h2 { font-size: 1.5em; border-bottom: 1px solid var(--vscode-panel-border, #444); padding-bottom: 0.3em; }
+h3 { font-size: 1.25em; }
+
+a { color: var(--vscode-textLink-foreground); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+code {
+  font-family: var(--vscode-editor-font-family, monospace);
+  font-size: 0.9em;
+  padding: 0.2em 0.4em;
+  background-color: var(--vscode-textCodeBlock-background, rgba(128,128,128,0.15));
+  border-radius: 3px;
+}
+
+pre {
+  padding: 16px;
+  overflow: auto;
+  background-color: var(--vscode-textCodeBlock-background, rgba(128,128,128,0.15));
+  border-radius: 6px;
+  line-height: 1.45;
+}
+
+pre code {
+  padding: 0;
+  background: none;
+  border-radius: 0;
+}
+
+blockquote {
+  margin: 0;
+  padding: 0 1em;
+  border-left: 4px solid var(--vscode-textBlockQuote-border, #444);
+  color: var(--vscode-textBlockQuote-foreground, #888);
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 16px 0;
+}
+
+th, td {
+  padding: 8px 12px;
+  border: 1px solid var(--vscode-panel-border, #444);
+  text-align: left;
+}
+
+th {
+  font-weight: 600;
+  background-color: var(--vscode-textCodeBlock-background, rgba(128,128,128,0.1));
+}
+
+hr {
+  border: none;
+  border-top: 1px solid var(--vscode-panel-border, #444);
+  margin: 24px 0;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+ul, ol {
+  padding-left: 2em;
+}
+
+li + li {
+  margin-top: 0.25em;
+}
+
+#preview {
+  padding: 16px 0;
+}

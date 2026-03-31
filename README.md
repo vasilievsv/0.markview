@@ -31,11 +31,15 @@
 
 ---
 
-## Быстрый старт
+## Установка
 
+Скачай `.vsix` из [Releases](https://github.com/vasilievsv/0.markview/releases), затем:
+
+```bash
+code --install-extension 0-markview-0.1.0.vsix
 ```
-ext install vasilievsv.0-markview
-```
+
+Или в VS Code / Kiro: Extensions → `...` → Install from VSIX.
 
 Открой любой `.md` файл. Готово.
 

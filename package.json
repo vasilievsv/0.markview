@@ -15,6 +15,15 @@
   "categories": [
     "Other"
   ],
+  "keywords": [
+    "markdown",
+    "preview",
+    "mermaid",
+    "pdf",
+    "multi-preview",
+    "toc",
+    "kiro"
+  ],
   "main": "./dist/extension.js",
   "activationEvents": [],
   "contributes": {

@@ -36,3 +36,8 @@ jobs:
           name: ${{ steps.version.outputs.tag }}
           files: '*.vsix'
           generate_release_notes: true
+
+      - name: Publish to Marketplace
+        run: npx @vscode/vsce publish --no-dependencies
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}

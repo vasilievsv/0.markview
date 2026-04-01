@@ -1,10 +1,15 @@
 {
   "name": "0-markview",
   "displayName": "0.markview",
-  "description": "Multi-preview markdown viewer for VSCode",
+  "description": "Мульти-preview markdown для VS Code и Kiro. PDF export, mermaid-диаграммы, TOC, lazy loading.",
   "version": "0.1.0",
   "publisher": "vasilievsv",
   "license": "MIT",
+  "icon": "media/icon.png",
+  "galleryBanner": {
+    "color": "#1e1e1e",
+    "theme": "dark"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/vasilievsv/0.markview"
@@ -13,7 +18,8 @@
     "vscode": "^1.75.0"
   },
   "categories": [
-    "Other"
+    "Other",
+    "Visualization"
   ],
   "keywords": [
     "markdown",

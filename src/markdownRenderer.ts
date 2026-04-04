@@ -34,7 +34,13 @@ export class MarkdownRenderer {
 
   render(markdown: string): string {
     this.lastToc = [];
-    return this.md.render(markdown);
+    const content = this.stripFrontmatter(markdown);
+    return this.md.render(content);
+  }
+
+  private stripFrontmatter(text: string): string {
+    const match = text.match(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/);
+    return match ? text.slice(match[0].length) : text;
   }
 
   getToc(): TocEntry[] {

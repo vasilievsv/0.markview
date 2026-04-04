@@ -9,6 +9,8 @@ export class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
   private readonly renderer = new MarkdownRenderer();
   private readonly panels = new Map<string, vscode.WebviewPanel>();
 
+  private readonly pendingResolves = new Map<string, number>();
+
   constructor(private readonly context: vscode.ExtensionContext) {}
 
   getPanel(uri: vscode.Uri): vscode.WebviewPanel | undefined {
@@ -21,15 +23,29 @@ export class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
     _token: vscode.CancellationToken
   ): Promise<void> {
     const key = document.uri.toString();
+    const count = (this.pendingResolves.get(key) || 0) + 1;
+    this.pendingResolves.set(key, count);
+
+    await new Promise(r => setTimeout(r, 50));
+
+    const isDiff = this.isInDiffView(document.uri) || (this.pendingResolves.get(key) || 0) > 1;
+    this.pendingResolves.set(key, (this.pendingResolves.get(key) || 1) - 1);
+
     this.panels.set(key, webviewPanel);
 
     webviewPanel.webview.options = {
-      enableScripts: true,
-      localResourceRoots: [
+      enableScripts: !isDiff,
+      localResourceRoots: isDiff ? [] : [
         vscode.Uri.joinPath(this.context.extensionUri, 'dist'),
         vscode.Uri.joinPath(this.context.extensionUri, 'media')
       ]
     };
+
+    if (isDiff) {
+      webviewPanel.webview.html = `<!DOCTYPE html><html><body><pre style="font-family:var(--vscode-editor-font-family);font-size:var(--vscode-editor-font-size);color:var(--vscode-editor-foreground);background:var(--vscode-editor-background);padding:16px;white-space:pre-wrap;word-wrap:break-word">${this.escapeHtml(document.getText())}</pre></body></html>`;
+      logger.info(`Diff mode — raw text: ${document.uri.fsPath} (scheme: ${document.uri.scheme})`);
+      return;
+    }
 
     const updateWebview = () => {
       const body = this.renderer.render(document.getText());
@@ -80,6 +96,22 @@ export class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
       logger.debug(`CustomEditor disposed: ${document.uri.fsPath}`);
     });
 
-    logger.info(`CustomEditor opened: ${document.uri.fsPath}`);
+    logger.info(`CustomEditor opened: ${document.uri.fsPath} (scheme: ${document.uri.scheme})`);
+  }
+
+  private isInDiffView(uri: vscode.Uri): boolean {
+    for (const group of vscode.window.tabGroups.all) {
+      for (const tab of group.tabs) {
+        if (!(tab.input instanceof vscode.TabInputTextDiff)) { continue; }
+        if (tab.input.original.toString() === uri.toString() || tab.input.modified.toString() === uri.toString()) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  private escapeHtml(text: string): string {
+    return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 }

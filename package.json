@@ -31,7 +31,9 @@
     "kiro"
   ],
   "main": "./dist/extension.js",
-  "activationEvents": [],
+  "activationEvents": [
+    "onLanguage:markdown"
+  ],
   "contributes": {
     "commands": [
       {
@@ -71,9 +73,14 @@
             "filenamePattern": "*.markdown"
           }
         ],
-        "priority": "default"
+        "priority": "option"
       }
     ],
+    "configurationDefaults": {
+      "workbench.editorAssociations": {
+        "*.md": "markview.markdownPreview"
+      }
+    },
     "configuration": {
       "title": "0.markview",
       "properties": {

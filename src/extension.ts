@@ -5,6 +5,7 @@ import { MarkdownEditorProvider } from './customMarkdownEditor';
 import { ConfigManager } from './configManager';
 import { AutoPreviewManager } from './autoPreviewManager';
 import { isMarkdownFile } from './utils';
+import { Interceptor } from './interceptor';
 import * as logger from './logger';
 
 export function activate(context: vscode.ExtensionContext) {
@@ -13,6 +14,8 @@ export function activate(context: vscode.ExtensionContext) {
   const previewManager = new PreviewManager(context.extensionUri);
   const configManager = new ConfigManager();
   const autoPreviewManager = new AutoPreviewManager(previewManager, configManager);
+  const interceptor = new Interceptor(configManager);
+  autoPreviewManager.setInterceptor(interceptor);
 
   const openPreview = vscode.commands.registerCommand(Commands.OPEN_PREVIEW, () => {
     const editor = vscode.window.activeTextEditor;
@@ -68,6 +71,7 @@ export function activate(context: vscode.ExtensionContext) {
     previewManager,
     configManager,
     autoPreviewManager,
+    interceptor,
     openPreview,
     openPreviewToSide,
     toggleAutoPreview,

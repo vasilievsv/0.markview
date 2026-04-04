@@ -2,7 +2,7 @@
   "name": "0-markview",
   "displayName": "0.markview",
   "description": "Мульти-preview markdown для VS Code и Kiro. PDF export, mermaid-диаграммы, TOC, lazy loading.",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "publisher": "vasilievsv",
   "license": "MIT",
   "icon": "media/icon.png",
@@ -31,7 +31,9 @@
     "kiro"
   ],
   "main": "./dist/extension.js",
-  "activationEvents": [],
+  "activationEvents": [
+    "onLanguage:markdown"
+  ],
   "contributes": {
     "commands": [
       {
@@ -71,9 +73,14 @@
             "filenamePattern": "*.markdown"
           }
         ],
-        "priority": "default"
+        "priority": "option"
       }
     ],
+    "configurationDefaults": {
+      "workbench.editorAssociations": {
+        "*.md": "markview.markdownPreview"
+      }
+    },
     "configuration": {
       "title": "0.markview",
       "properties": {
